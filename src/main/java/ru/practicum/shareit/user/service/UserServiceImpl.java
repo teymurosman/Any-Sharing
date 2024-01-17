@@ -44,12 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto update(Long userId, User user) {
-        log.debug("Обновление данных пользователя с id]{}.", userId);
+    public UserDto update(Long userId, UserDto userDto) {
+        log.debug("Обновление данных пользователя с id={}.", userId);
 
         getUserById(userId);
 
-        return UserMapper.toUserDto(userRepository.update(userId, user));
+        return UserMapper.toUserDto(userRepository.update(userId, userDto));
     }
 
     @Override

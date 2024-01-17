@@ -1,13 +1,14 @@
 package ru.practicum.shareit.item.repository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Repository
+@Component
 @RequiredArgsConstructor
 public class ItemRepositoryImpl implements ItemRepository {
 
@@ -40,17 +41,17 @@ public class ItemRepositoryImpl implements ItemRepository {
     }
 
     @Override
-    public Item update(Long itemId, Item item) {
+    public Item update(Long itemId, ItemDto itemDto) {
         Item itemToUpdate = items.get(itemId);
 
-        if (item.getName() != null && !item.getName().isBlank()) {
-            itemToUpdate.setName(item.getName());
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+            itemToUpdate.setName(itemDto.getName());
         }
-        if (item.getDescription() != null && !item.getDescription().isBlank()) {
-            itemToUpdate.setDescription(item.getDescription());
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+            itemToUpdate.setDescription(itemDto.getDescription());
         }
-        if (item.getAvailable() != null) {
-            itemToUpdate.setAvailable(item.getAvailable());
+        if (itemDto.getAvailable() != null) {
+            itemToUpdate.setAvailable(itemDto.getAvailable());
         }
 
         return itemToUpdate;

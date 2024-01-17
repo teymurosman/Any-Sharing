@@ -1,12 +1,13 @@
 package ru.practicum.shareit.user.repository;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 import ru.practicum.shareit.user.User;
+import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.exception.UserAlreadyExistsException;
 
 import java.util.*;
 
-@Repository
+@Component
 public class UserRepositoryImpl implements UserRepository {
 
     private final Map<Long, User> users = new HashMap<>();
@@ -15,7 +16,7 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User add(User user) {
-        checkEmail(user);
+        checkEmail(user.getEmail());
 
         final long userId = ++idCounter;
         user.setId(userId);
@@ -37,14 +38,14 @@ public class UserRepositoryImpl implements UserRepository {
     }
 
     @Override
-    public User update(Long userId, User user) {
+    public User update(Long userId, UserDto userDto) {
         User userToUpdate = users.get(userId);
-        String newEmail = user.getEmail();
-        String newName = user.getName();
+        String newEmail = userDto.getEmail();
+        String newName = userDto.getName();
 
         if (newEmail != null && !newEmail.isBlank() && newEmail.matches(".+[@].+[\\.].+")) {
             if (!userToUpdate.getEmail().equals(newEmail)) {
-                checkEmail(user);
+                checkEmail(newEmail);
                 emails.remove(userToUpdate.getEmail());
                 emails.add(newEmail);
                 userToUpdate.setEmail(newEmail);
@@ -63,8 +64,8 @@ public class UserRepositoryImpl implements UserRepository {
         emails.remove(user.getEmail());
     }
 
-    private void checkEmail(User user) {
-        if (emails.contains(user.getEmail())) {
+    private void checkEmail(String email) {
+        if (emails.contains(email)) {
             throw new UserAlreadyExistsException("Пользователь с такой почтой уже сущетсвует.");
         }
     }

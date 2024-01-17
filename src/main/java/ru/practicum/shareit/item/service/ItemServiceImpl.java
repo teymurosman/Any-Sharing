@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto update(Long itemId, Long userId, Item item) {
+    public ItemDto update(Long itemId, Long userId, ItemDto itemDto) {
         log.debug("Обновление данных вещи с id={} пользователем с id={}.", itemId, userId);
 
         userService.getUserById(userId);
@@ -61,7 +61,7 @@ public class ItemServiceImpl implements ItemService {
             throw new ForbiddenAccessToItemException("Редактирование вещи доступно только её владельцу.");
         }
 
-        return ItemMapper.toItemDto(itemRepository.update(itemId, item));
+        return ItemMapper.toItemDto(itemRepository.update(itemId, itemDto));
     }
 
     @Override

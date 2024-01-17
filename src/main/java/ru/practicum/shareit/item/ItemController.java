@@ -8,9 +8,6 @@ import ru.practicum.shareit.item.service.ItemService;
 import javax.validation.Valid;
 import java.util.Collection;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
@@ -36,7 +33,7 @@ public class ItemController {
     @PatchMapping("/{itemId}")
     public ItemDto update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId,
                           @RequestBody ItemDto itemDto) {
-        return itemService.update(itemId, userId, ItemMapper.toItem(itemDto));
+        return itemService.update(itemId, userId, itemDto);
     }
 
     @GetMapping("/search")
