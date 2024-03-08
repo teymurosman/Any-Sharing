@@ -14,7 +14,9 @@ import javax.persistence.*;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @SequenceGenerator(name = "pk_sequence", sequenceName = "users_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @EqualsAndHashCode.Include
     private Long id;
 

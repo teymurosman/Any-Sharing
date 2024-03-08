@@ -17,7 +17,9 @@ import java.time.LocalDateTime;
 public class Booking {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "pk_sequence", sequenceName = "bookings_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @EqualsAndHashCode.Include
     private Long id;
 

@@ -18,7 +18,9 @@ import java.util.Set;
 public class Item {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "pk_sequence", sequenceName = "items_id_seq", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @EqualsAndHashCode.Include
     private Long id;
 
@@ -34,8 +36,6 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
-
-    private Long requestId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinFormula("(SELECT b.id FROM bookings b " +
