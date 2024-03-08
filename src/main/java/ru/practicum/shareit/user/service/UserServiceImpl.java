@@ -3,6 +3,7 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
 import ru.practicum.shareit.user.UserMapper;
@@ -15,12 +16,14 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
+    @Transactional
     @Override
     public UserResponse add(User user) {
         log.debug("Добавление нового пользователя ({}).", user.getEmail());
@@ -47,6 +50,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public UserResponse update(Long userId, User user) {
         log.debug("Обновление данных пользователя с id={}.", userId);
@@ -64,6 +68,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(userRepository.save(userToUpdate));
     }
 
+    @Transactional
     @Override
     public void delete(Long userId) {
         log.debug("Удаление пользователя с id={}.", userId);

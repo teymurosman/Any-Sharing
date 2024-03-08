@@ -3,6 +3,7 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.exception.BookingException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.common.EntityNotFoundException;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ItemServiceImpl implements ItemService {
 
@@ -35,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
     private final CommentMapper commentMapper;
 
+    @Transactional
     @Override
     public ItemResponse add(Long userId, Item item) {
         log.debug("Добавление новой вещи({}) пользователем с id={}.", item.getName(), userId);
@@ -70,6 +73,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public ItemResponse update(Long itemId, Long userId, Item item) {
         log.debug("Обновление данных вещи с id={} пользователем с id={}.", itemId, userId);
@@ -106,6 +110,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public CommentResponse addComment(Long itemId, Comment comment, Long userId) {
         log.debug("Добавление комментария к вещи с id={} от пользователя с id={}.", itemId, userId);

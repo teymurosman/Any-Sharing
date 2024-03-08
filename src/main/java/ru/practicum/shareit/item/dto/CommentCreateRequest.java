@@ -1,16 +1,18 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor // Без NoArgs и AllArgs тесты по comments падают (JSON parse error: Cannot construct instance)
+@Builder
 public class CommentCreateRequest {
 
     @NotBlank(message = "Комментарий должен содержать текст.")
     private String text;
-
-
 }

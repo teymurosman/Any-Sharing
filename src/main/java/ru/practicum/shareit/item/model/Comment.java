@@ -12,14 +12,16 @@ import java.time.LocalDateTime;
 @Table(name = "comments")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 public class Comment {
 
+//    @Id
+//    @SequenceGenerator(name = "pk_sequence", sequenceName = "comments_id_seq", allocationSize = 1)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+//    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @Id
-    @SequenceGenerator(name = "pk_sequence", sequenceName = "comments_id_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
-    @Column(name = "id", nullable = false, updatable = false, unique = true)
-    @EqualsAndHashCode.Include
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "text", nullable = false)

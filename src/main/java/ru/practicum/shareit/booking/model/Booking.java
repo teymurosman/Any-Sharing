@@ -13,31 +13,33 @@ import java.time.LocalDateTime;
 @Table(name = "bookings")
 @Getter
 @Setter
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(of = "id")
 public class Booking {
 
+//    @Id
+//    @SequenceGenerator(name = "pk_sequence", sequenceName = "bookings_id_seq", allocationSize = 1)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+//    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @Id
-    @SequenceGenerator(name = "pk_sequence", sequenceName = "bookings_id_seq", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
-    @Column(name = "id", nullable = false, updatable = false, unique = true)
-    @EqualsAndHashCode.Include
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "booker_id", nullable = false)
-    User booker;
+    private User booker;
 
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)
-    Item item;
+    private Item item;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    BookingStatus status;
+    private BookingStatus status;
 
     @Column(name = "start_time", nullable = false)
-    LocalDateTime start;
+    private LocalDateTime start;
 
     @Column(name = "end_time", nullable = false)
-    LocalDateTime end;
+    private LocalDateTime end;
 }
