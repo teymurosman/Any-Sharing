@@ -3,13 +3,14 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.user.exception.UserNotFoundException;
+import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.user.User;
-import ru.practicum.shareit.user.UserDto;
 import ru.practicum.shareit.user.UserMapper;
+import ru.practicum.shareit.user.dto.UserResponse;
 import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,45 +19,56 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
-    public UserDto add(User user) {
+    public UserResponse add(User user) {
         log.debug("Добавление нового пользователя ({}).", user.getEmail());
 
-        return UserMapper.toUserDto(userRepository.add(user));
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
-    public UserDto getUserById(Long userId) {
+    public UserResponse getByUserId(Long userId) {
         log.debug("Получение пользователя с id={}.", userId);
 
-        return UserMapper.toUserDto(userRepository.getUserById(userId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с id=" + userId + " не найден.")));
+        return userMapper.toUserResponse(userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден.")));
     }
 
     @Override
-    public Collection<UserDto> getAll() {
+    public Collection<UserResponse> getAll() {
         log.debug("Получение списка всех пользователей.");
 
-        return userRepository.getAll().stream()
-                .map(UserMapper::toUserDto)
-                .collect(Collectors.toSet());
+        List<User> users = userRepository.findAll();
+
+        return users.stream()
+                .map(userMapper::toUserResponse)
+                .collect(Collectors.toList());
     }
 
     @Override
-    public UserDto update(Long userId, UserDto userDto) {
+    public UserResponse update(Long userId, User user) {
         log.debug("Обновление данных пользователя с id={}.", userId);
 
-        getUserById(userId);
+        User userToUpdate = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден."));
 
-        return UserMapper.toUserDto(userRepository.update(userId, userDto));
+        if (user.getName() != null && !user.getName().isBlank()) {
+            userToUpdate.setName(user.getName());
+        }
+        if (user.getEmail() != null && user.getEmail().matches(".+[@].+[\\.].+")) {
+            userToUpdate.setEmail(user.getEmail());
+        }
+
+        return userMapper.toUserResponse(userRepository.save(userToUpdate));
     }
 
     @Override
     public void delete(Long userId) {
         log.debug("Удаление пользователя с id={}.", userId);
-        getUserById(userId);
+        getByUserId(userId);
 
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 }

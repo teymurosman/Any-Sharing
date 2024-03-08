@@ -2,6 +2,9 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.user.dto.UserCreateRequest;
+import ru.practicum.shareit.user.dto.UserResponse;
+import ru.practicum.shareit.user.dto.UserUpdateRequest;
 import ru.practicum.shareit.user.service.UserService;
 
 import javax.validation.Valid;
@@ -13,25 +16,26 @@ import java.util.Collection;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @PostMapping
-    public UserDto add(@Valid @RequestBody UserDto userDto) {
-        return userService.add(UserMapper.toUser(userDto));
+    public UserResponse add(@Valid @RequestBody UserCreateRequest userCreateRequest) {
+        return userService.add(userMapper.toUser(userCreateRequest));
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUserById(@PathVariable Long userId) {
-        return userService.getUserById(userId);
+    public UserResponse getByUserId(@PathVariable Long userId) {
+        return userService.getByUserId(userId);
     }
 
     @GetMapping
-    public Collection<UserDto> getAll() {
+    public Collection<UserResponse> getAll() {
         return userService.getAll();
     }
 
     @PatchMapping("/{userId}")
-    public UserDto update(@PathVariable Long userId, @RequestBody UserDto userDto) {
-        return userService.update(userId, userDto);
+    public UserResponse update(@PathVariable Long userId, @RequestBody UserUpdateRequest userUpdateRequest) {
+        return userService.update(userId, userMapper.toUser(userUpdateRequest));
     }
 
     @DeleteMapping("/{userId}")
