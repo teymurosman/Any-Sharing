@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,10 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
-@AllArgsConstructor
-public class ItemDto {
-
-    private Long id;
+public class ItemCreateRequest {
 
     @NotBlank(message = "Название вещи не может быть пустым.")
     private String name;
@@ -22,6 +18,4 @@ public class ItemDto {
 
     @NotNull(message = "Статус вещи должен быть указан.")
     private Boolean available;
-
-    private Long requestId;
 }

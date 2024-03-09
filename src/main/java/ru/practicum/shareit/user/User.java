@@ -1,17 +1,30 @@
 package ru.practicum.shareit.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-@Builder
-@AllArgsConstructor
+import javax.persistence.*;
+
+@Entity
+@Table(name = "users")
+@Getter
+@Setter
+@EqualsAndHashCode(of = "id")
 public class User {
 
+//    @Id
+//    @SequenceGenerator(name = "pk_sequence", sequenceName = "users_id_seq", allocationSize = 1)
+//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
+//    @Column(name = "id", nullable = false, updatable = false, unique = true)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "email", nullable = false, unique = true)
     private String email;
 }
