@@ -199,6 +199,10 @@
 					<version>0.8.8</version>
 					<configuration>
 						<output>file</output>
+						<excludes>
+							<exclude>**/*MapperImpl.class</exclude>
+							<exclude>**/ErrorHandler.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>

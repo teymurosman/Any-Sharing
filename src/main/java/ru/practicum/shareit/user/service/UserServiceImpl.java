@@ -72,7 +72,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(Long userId) {
         log.debug("Удаление пользователя с id={}.", userId);
-        getByUserId(userId);
+
+        userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден."));
 
         userRepository.deleteById(userId);
     }

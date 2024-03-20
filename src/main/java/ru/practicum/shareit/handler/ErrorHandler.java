@@ -13,7 +13,8 @@ import ru.practicum.shareit.booking.exception.BookingException;
 import ru.practicum.shareit.booking.exception.NoSuchStateException;
 import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.common.ForbiddenAccessToEntityException;
-import ru.practicum.shareit.user.exception.UserAlreadyExistsException;
+
+import javax.validation.ConstraintViolationException;
 
 @Slf4j
 @RestControllerAdvice
@@ -22,14 +23,6 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleEntityNotFoundException(final EntityNotFoundException e) {
-        log.info(e.getMessage());
-
-        return new ErrorResponse(e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse handleUserAlreadyExistsException(final UserAlreadyExistsException e) {
         log.info(e.getMessage());
 
         return new ErrorResponse(e.getMessage());
@@ -86,6 +79,14 @@ public class ErrorHandler {
         log.info(e.getMessage());
 
         return new ErrorResponse("Не удалось обнаружить параметр: " + e.getParameterName());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleConstraintViolationException(final ConstraintViolationException e) {
+        log.info(e.getMessage());
+
+        return new ErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler

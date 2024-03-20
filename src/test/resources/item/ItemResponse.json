@@ -1,0 +1,20 @@
+{
+  "id": 4,
+  "name": "item name",
+  "description": "description of item",
+  "available": true,
+  "requestId": 5,
+  "lastBooking": null,
+  "nextBooking": {
+    "id": 1,
+    "bookerId": 2
+  },
+  "comments": [
+    {
+      "id": 3,
+      "authorName": "userName",
+      "created": "2024-01-02T03:04:05",
+      "text": "comment for item"
+    }
+  ]
+}

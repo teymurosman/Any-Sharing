@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 
 @Data
 @Builder
-public class UserCreateRequest {
+public class UserRequest {
 
     @NotBlank(message = "Имя пользователя не может быть пустым.")
     private String name;

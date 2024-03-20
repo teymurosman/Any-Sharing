@@ -2,6 +2,8 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,7 +43,7 @@ public class BookingServiceImpl implements BookingService {
     public BookingResponse add(Booking booking, Long bookerId) {
         log.debug("Добавление нового бронирования для вещи с id={}.", booking.getItem().getId());
 
-        if (booking.getStart().isAfter(booking.getEnd()) || booking.getStart().equals(booking.getEnd())) {
+        if (!booking.getEnd().isAfter(booking.getStart())) {
             throw new BookingException("Дата начала бронирования должна быть раньше даты окончания.");
         }
 
@@ -72,6 +74,10 @@ public class BookingServiceImpl implements BookingService {
 
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new EntityNotFoundException("Бронирование с id=" + bookingId + " не найдено."));
+
+        userRepository.findById(ownerId)
+                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не найден."));
+
         if (!booking.getStatus().equals(BookingStatus.WAITING)) {
             throw new BookingException("Обновить статус вещи возможно только со статуса \"WAITING\".");
         }
@@ -79,9 +85,6 @@ public class BookingServiceImpl implements BookingService {
             throw new ForbiddenAccessToEntityException("Обновление статуса бронирования" +
                     " возможно только владельцем вещи.");
         }
-
-        userRepository.findById(ownerId)
-                .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + ownerId + " не найден."));
 
         booking.setStatus(approved ? BookingStatus.APPROVED : BookingStatus.REJECTED);
         return bookingMapper.toBookingResponse(bookingRepository.save(booking));
@@ -103,7 +106,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponse> getByBookerId(StateFilter state, Long bookerId) {
+    public Collection<BookingResponse> getByBookerId(StateFilter state, Long bookerId, int from, int size) {
         log.debug("Получение списка бронирований пользователя с id={}.", bookerId);
 
         userRepository.findById(bookerId)
@@ -111,23 +114,24 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         Sort sortStartDesc = Sort.by(Sort.Direction.DESC, "start");
+        Pageable page = getPageable(from, size, sortStartDesc);
 
         switch (state) {
             case ALL:
-                return bookingRepository.findByBookerId(bookerId, sortStartDesc).stream()
+                return bookingRepository.findByBookerId(bookerId, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingRepository.findByBookerIdAndStartLessThanEqualAndEndGreaterThanEqual(
-                        bookerId, currentTime, currentTime, sortStartDesc).stream()
+                        bookerId, currentTime, currentTime, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case PAST:
-                return bookingRepository.findByBookerIdAndEndLessThan(bookerId, currentTime, sortStartDesc).stream()
+                return bookingRepository.findByBookerIdAndEndLessThan(bookerId, currentTime, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case FUTURE:
-                return bookingRepository.findByBookerIdAndStartGreaterThan(bookerId, currentTime, sortStartDesc)
+                return bookingRepository.findByBookerIdAndStartGreaterThan(bookerId, currentTime, page)
                         .stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
@@ -135,7 +139,7 @@ public class BookingServiceImpl implements BookingService {
             case APPROVED:
             case REJECTED:
                 return bookingRepository.findByBookerIdAndStatusIs(bookerId,
-                                BookingStatus.valueOf(state.toString()), sortStartDesc)
+                                BookingStatus.valueOf(state.toString()), page)
                         .stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
@@ -145,7 +149,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingResponse> getByOwnerId(StateFilter state, Long ownerId) {
+    public Collection<BookingResponse> getByOwnerId(StateFilter state, Long ownerId, int from, int size) {
         log.debug("Получение списка бронирований вещей по владельцу с id={}.", ownerId);
 
         userRepository.findById(ownerId)
@@ -153,23 +157,24 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         Sort sortStartDesc = Sort.by(Sort.Direction.DESC, "start");
+        Pageable page = getPageable(from, size, sortStartDesc);
 
         switch (state) {
             case ALL:
-                return bookingRepository.findByItemOwnerId(ownerId, sortStartDesc).stream()
+                return bookingRepository.findByItemOwnerId(ownerId, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingRepository.findByItemOwnerIdAndStartLessThanEqualAndEndGreaterThanEqual(
-                                ownerId, currentTime, currentTime, sortStartDesc).stream()
+                                ownerId, currentTime, currentTime, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case PAST:
-                return bookingRepository.findByItemOwnerIdAndEndLessThan(ownerId, currentTime, sortStartDesc).stream()
+                return bookingRepository.findByItemOwnerIdAndEndLessThan(ownerId, currentTime, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case FUTURE:
-                return bookingRepository.findByItemOwnerIdAndStartGreaterThan(ownerId, currentTime, sortStartDesc)
+                return bookingRepository.findByItemOwnerIdAndStartGreaterThan(ownerId, currentTime, page)
                         .stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
@@ -177,12 +182,16 @@ public class BookingServiceImpl implements BookingService {
             case APPROVED:
             case REJECTED:
                 return bookingRepository.findByItemOwnerIdAndStatusIs(ownerId,
-                                BookingStatus.valueOf(state.toString()), sortStartDesc)
+                                BookingStatus.valueOf(state.toString()), page)
                         .stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             default:
                 throw new NoSuchStateException("Данный параметр поиска не поддерживается.");
         }
+    }
+
+    private Pageable getPageable(int from, int size, Sort sort) {
+        return PageRequest.of(from / size, size, sort);
     }
 }

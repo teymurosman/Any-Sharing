@@ -2,6 +2,8 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.exception.BookingException;
@@ -46,8 +48,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден."));
         item.setOwner(owner);
 
-        Item item1 = itemRepository.save(item);
-        return itemMapper.toItemResponse(item1);
+        return itemMapper.toItemResponse(itemRepository.save(item));
     }
 
     @Override
@@ -65,10 +66,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponse> getAllByOwnerId(Long userId) {
+    public Collection<ItemResponse> getAllByOwnerId(Long userId, int from, int size) {
         log.debug("Получение списка вещей пользователя с id={}.", userId);
 
-        return itemRepository.getByOwnerIdOrderByIdAsc(userId).stream()
+        return itemRepository.findByOwnerIdOrderByIdAsc(userId, getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }
@@ -98,14 +99,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponse> search(String searchQuery) {
+    public Collection<ItemResponse> search(String searchQuery, int from, int size) {
         log.debug("Поиск вещей по запросу \"{}\".", searchQuery);
 
         if (searchQuery.isBlank()) {
             return Collections.emptyList();
         }
 
-        return itemRepository.findAvailableBySubstring(searchQuery).stream()
+        return itemRepository.findAvailableBySubstring(searchQuery, getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }
@@ -128,5 +129,9 @@ public class ItemServiceImpl implements ItemService {
         comment.setItem(item);
 
         return commentMapper.toCommentResponse(commentRepository.save(comment));
+    }
+
+    private Pageable getPageable(int from, int size) {
+        return PageRequest.of(from / size, size);
     }
 }

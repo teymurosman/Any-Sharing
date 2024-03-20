@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -8,11 +9,13 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Collection;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/items")
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -21,8 +24,8 @@ public class ItemController {
 
     @PostMapping
     public ItemResponse add(@RequestHeader("X-Sharer-User-Id") Long userId,
-                            @Valid @RequestBody ItemCreateRequest itemCreateRequest) {
-        return itemService.add(userId, itemMapper.toItem(itemCreateRequest));
+                            @Valid @RequestBody ItemFromRequest itemFromRequest) {
+        return itemService.add(userId, itemMapper.toItem(itemFromRequest));
     }
 
     @GetMapping("/{itemId}")
@@ -31,19 +34,35 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemResponse> getAllByUserId(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        return itemService.getAllByOwnerId(userId);
+    public Collection<ItemResponse> getAllByOwnerId(@RequestHeader("X-Sharer-User-Id") Long userId,
+                                                    @RequestParam(name = "from", defaultValue = "0")
+                                                   @Min(value = 0,
+                                                           message = "Параметр начала не может быть отрицательным")
+                                                   int from,
+                                                    @RequestParam(name = "size", defaultValue = "10")
+                                                   @Min(value = 1,
+                                                           message = "Параметр размера страницы должен быть больше 0")
+                                                   int size) {
+        return itemService.getAllByOwnerId(userId, from, size);
     }
 
     @PatchMapping("/{itemId}")
     public ItemResponse update(@PathVariable Long itemId, @RequestHeader("X-Sharer-User-Id") Long userId,
-                          @RequestBody ItemUpdateRequest itemUpdateRequest) {
-        return itemService.update(itemId, userId, itemMapper.toItem(itemUpdateRequest));
+                          @RequestBody ItemFromRequest itemFromRequest) {
+        return itemService.update(itemId, userId, itemMapper.toItem(itemFromRequest));
     }
 
     @GetMapping("/search")
-    public Collection<ItemResponse> search(@RequestParam("text") String text) {
-        return itemService.search(text);
+    public Collection<ItemResponse> search(@RequestParam("text") String text,
+                                           @RequestParam(name = "from", defaultValue = "0")
+                                           @Min(value = 0,
+                                                   message = "Параметр начала не может быть отрицательным")
+                                           int from,
+                                           @RequestParam(name = "size", defaultValue = "10")
+                                           @Min(value = 1,
+                                                   message = "Параметр размера страницы должен быть больше 0")
+                                           int size) {
+        return itemService.search(text, from, size);
     }
 
     @PostMapping("/{itemId}/comment")

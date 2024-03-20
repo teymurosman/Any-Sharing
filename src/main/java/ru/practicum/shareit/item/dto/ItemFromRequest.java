@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
-public class ItemCreateRequest {
+public class ItemFromRequest {
 
     @NotBlank(message = "Название вещи не может быть пустым.")
     private String name;
@@ -18,4 +18,6 @@ public class ItemCreateRequest {
 
     @NotNull(message = "Статус вещи должен быть указан.")
     private Boolean available;
+
+    private Long requestId;
 }
