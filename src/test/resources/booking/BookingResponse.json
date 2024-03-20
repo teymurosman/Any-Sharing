@@ -1,0 +1,31 @@
+{
+  "id": 7,
+  "item": {
+    "id": 5,
+    "name": "item name",
+    "description": "item description",
+    "available": true,
+    "requestId": 6,
+    "comments": [
+      {
+        "id": 4,
+        "authorName": "userAuthor",
+        "created": "2024-01-02T03:04:05",
+        "text": "comment for item"
+      }
+    ],
+    "nextBooking": {
+      "id": 2,
+      "bookerId": 3
+    },
+    "lastBooking": null
+  },
+  "booker": {
+    "id": 1,
+    "name": "userName",
+    "email": "user@email.com"
+  },
+  "status": "APPROVED",
+  "start": "2345-01-02T03:04:05",
+  "end": "2356-03-04T05:06:07"
+}

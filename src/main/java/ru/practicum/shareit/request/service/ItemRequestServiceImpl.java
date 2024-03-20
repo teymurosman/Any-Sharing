@@ -2,13 +2,14 @@ package ru.practicum.shareit.request.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.common.EntityNotFoundException;
-import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.common.PageableFactory;
+import ru.practicum.shareit.item.dto.ItemForRequestResponse;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.request.ItemRequestMapper;
@@ -20,8 +21,12 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 @Slf4j
 @Service
@@ -33,6 +38,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     private final UserRepository userRepository;
     private final ItemRepository itemRepository;
     private final ItemRequestMapper itemRequestMapper;
+    private final ItemMapper itemMapper;
 
     @Transactional
     @Override
@@ -54,13 +60,19 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         getUser(userId);
 
-        return itemRequestRepository.findAllByRequesterId(userId).stream()
-                .peek(itemRequest -> {
-                    final List<Item> items = itemRepository.findAllByRequestId(itemRequest.getId());
-                    itemRequest.setItems(items);
-                })
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterId(userId);
+
+        Map<Long, List<ItemForRequestResponse>> itemsByRequest = itemRepository.findByRequestIdIn(itemRequests.stream()
+                .map(ItemRequest::getId)
+                .collect(toList())).stream()
+                .map(itemMapper::toItemForRequestResponse)
+                .collect(groupingBy(ItemForRequestResponse::getRequestId, toList()));
+
+        return itemRequests.stream()
                 .map(itemRequestMapper::toItemRequestWithOffersResponse)
-                .collect(Collectors.toList());
+                .peek(itemRequest -> itemRequest.setItems(
+                        itemsByRequest.getOrDefault(itemRequest.getId(), Collections.emptyList())))
+                .collect(toList());
     }
 
 
@@ -70,15 +82,22 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         getUser(userId);
 
-        Pageable page = PageRequest.of(from / size, size, Sort.by(Sort.Direction.DESC, "created"));
+        Pageable page = PageableFactory
+                .getPageable(from / size, size, Sort.by(Sort.Direction.DESC, "created"));
 
-        return itemRequestRepository.findAllByRequesterIdNot(userId, page).stream()
-                .peek(itemRequest -> {
-                    final List<Item> items = itemRepository.findAllByRequestId(itemRequest.getId());
-                    itemRequest.setItems(items);
-                })
+        List<ItemRequest> itemRequests = itemRequestRepository.findAllByRequesterIdNot(userId, page);
+
+        Map<Long, List<ItemForRequestResponse>> itemsByRequest = itemRepository.findByRequestIdIn(itemRequests.stream()
+                        .map(ItemRequest::getId)
+                        .collect(toList())).stream()
+                .map(itemMapper::toItemForRequestResponse)
+                .collect(groupingBy(ItemForRequestResponse::getRequestId, toList()));
+
+        return itemRequests.stream()
                 .map(itemRequestMapper::toItemRequestWithOffersResponse)
-                .collect(Collectors.toList());
+                .peek(itemRequest -> itemRequest.setItems(
+                        itemsByRequest.getOrDefault(itemRequest.getId(), Collections.emptyList())))
+                .collect(toList());
     }
 
     @Override
@@ -87,13 +106,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
         getUser(userId);
 
-        ItemRequest itemRequest = itemRequestRepository.findById(requestId)
-                .orElseThrow(() -> new EntityNotFoundException("Запрос вещи с id=" + requestId + " не найден."));
+        ItemRequestWithOffersResponse itemRequest = itemRequestMapper
+                .toItemRequestWithOffersResponse(itemRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Запрос вещи с id=" + requestId + " не найден.")));
 
-        List<Item> items = itemRepository.findAllByRequestId(requestId);
+        List<ItemForRequestResponse> items = itemRepository.findAllByRequestId(requestId).stream()
+                        .map(itemMapper::toItemForRequestResponse)
+                        .collect(toList());
         itemRequest.setItems(items);
 
-        return itemRequestMapper.toItemRequestWithOffersResponse(itemRequest);
+        return itemRequest;
     }
 
     private User getUser(Long userId) {

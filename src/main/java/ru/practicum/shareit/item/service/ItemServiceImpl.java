@@ -2,14 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.exception.BookingException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.common.ForbiddenAccessToEntityException;
+import ru.practicum.shareit.common.PageableFactory;
 import ru.practicum.shareit.item.dto.CommentResponse;
 import ru.practicum.shareit.item.dto.ItemResponse;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -69,7 +68,7 @@ public class ItemServiceImpl implements ItemService {
     public Collection<ItemResponse> getAllByOwnerId(Long userId, int from, int size) {
         log.debug("Получение списка вещей пользователя с id={}.", userId);
 
-        return itemRepository.findByOwnerIdOrderByIdAsc(userId, getPageable(from, size)).stream()
+        return itemRepository.findByOwnerIdOrderByIdAsc(userId, PageableFactory.getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }
@@ -106,7 +105,7 @@ public class ItemServiceImpl implements ItemService {
             return Collections.emptyList();
         }
 
-        return itemRepository.findAvailableBySubstring(searchQuery, getPageable(from, size)).stream()
+        return itemRepository.findAvailableBySubstring(searchQuery, PageableFactory.getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }
@@ -129,9 +128,5 @@ public class ItemServiceImpl implements ItemService {
         comment.setItem(item);
 
         return commentMapper.toCommentResponse(commentRepository.save(comment));
-    }
-
-    private Pageable getPageable(int from, int size) {
-        return PageRequest.of(from / size, size);
     }
 }

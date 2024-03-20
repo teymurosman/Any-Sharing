@@ -2,7 +2,6 @@ package ru.practicum.shareit.booking.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -17,6 +16,7 @@ import ru.practicum.shareit.booking.model.StateFilter;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.common.ForbiddenAccessToEntityException;
+import ru.practicum.shareit.common.PageableFactory;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.User;
@@ -114,7 +114,7 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         Sort sortStartDesc = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = getPageable(from, size, sortStartDesc);
+        Pageable page = PageableFactory.getPageable(from, size, sortStartDesc);
 
         switch (state) {
             case ALL:
@@ -123,7 +123,7 @@ public class BookingServiceImpl implements BookingService {
                         .collect(Collectors.toList());
             case CURRENT:
                 return bookingRepository.findByBookerIdAndStartLessThanEqualAndEndGreaterThanEqual(
-                        bookerId, currentTime, currentTime, page).stream()
+                                bookerId, currentTime, currentTime, page).stream()
                         .map(bookingMapper::toBookingResponse)
                         .collect(Collectors.toList());
             case PAST:
@@ -157,7 +157,7 @@ public class BookingServiceImpl implements BookingService {
 
         LocalDateTime currentTime = LocalDateTime.now();
         Sort sortStartDesc = Sort.by(Sort.Direction.DESC, "start");
-        Pageable page = getPageable(from, size, sortStartDesc);
+        Pageable page = PageableFactory.getPageable(from, size, sortStartDesc);
 
         switch (state) {
             case ALL:
@@ -189,9 +189,5 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new NoSuchStateException("Данный параметр поиска не поддерживается.");
         }
-    }
-
-    private Pageable getPageable(int from, int size, Sort sort) {
-        return PageRequest.of(from / size, size, sort);
     }
 }

@@ -10,6 +10,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.common.EntityNotFoundException;
+import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.request.ItemRequest;
@@ -45,6 +46,9 @@ class ItemRequestServiceImplTest {
 
     @Spy
     ItemRequestMapper itemRequestMapper = Mappers.getMapper(ItemRequestMapper.class);
+
+    @Spy
+    ItemMapper itemMapper = Mappers.getMapper(ItemMapper.class);
 
     ItemRequest itemRequest;
 
@@ -106,8 +110,6 @@ class ItemRequestServiceImplTest {
     void getAllByUserIdNormal() {
         when(userRepository.findById(user2.getId()))
                 .thenReturn(Optional.of(user2));
-        when(itemRepository.findAllByRequestId(itemRequest.getId()))
-                .thenReturn(List.of(item));
         when(itemRequestRepository.findAllByRequesterId(user2.getId()))
                 .thenReturn(List.of(itemRequest));
 
@@ -126,12 +128,15 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(user2));
         when(itemRequestRepository.findAllByRequesterIdNot(anyLong(), any(Pageable.class)))
                 .thenReturn(List.of(itemRequest));
+        ItemRequestWithOffersResponse itemRequestWithOffersResponse =
+                itemRequestMapper.toItemRequestWithOffersResponse(itemRequest);
+        itemRequestWithOffersResponse.setItems(List.of(itemMapper.toItemForRequestResponse(item)));
 
-        Collection<ItemRequestWithOffersResponse> foundItemRequests =
-                itemRequestService.getAll(user2.getId(), from, size);
+        List<ItemRequestWithOffersResponse> foundItemRequests =
+                List.copyOf(itemRequestService.getAll(user2.getId(), from, size));
 
         assertEquals(foundItemRequests.size(), 1);
-        assertTrue(foundItemRequests.contains(itemRequestMapper.toItemRequestWithOffersResponse(itemRequest)));
+        assertNotNull(foundItemRequests.get(0).getItems());
         verify(itemRequestRepository).findAllByRequesterIdNot(anyLong(), any(Pageable.class));
     }
 
@@ -143,12 +148,15 @@ class ItemRequestServiceImplTest {
                 .thenReturn(Optional.of(user2));
         when(itemRepository.findAllByRequestId(itemRequest.getId()))
                 .thenReturn(List.of(item));
+        ItemRequestWithOffersResponse itemRequestWithOffersResponse =
+                itemRequestMapper.toItemRequestWithOffersResponse(itemRequest);
+        itemRequestWithOffersResponse.setItems(List.of(itemMapper.toItemForRequestResponse(item)));
 
         ItemRequestWithOffersResponse foundItemRequest = itemRequestService.getById(user2.getId(), itemRequest.getId());
 
         assertEquals(1, foundItemRequest.getItems().size());
         assertEquals(item.getName(), foundItemRequest.getItems().get(0).getName());
-        assertEquals(itemRequestMapper.toItemRequestWithOffersResponse(itemRequest), foundItemRequest);
+        assertEquals(itemRequestWithOffersResponse, foundItemRequest);
         verify(itemRequestRepository).findById(itemRequest.getId());
     }
 

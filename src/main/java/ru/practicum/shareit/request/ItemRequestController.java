@@ -9,7 +9,8 @@ import ru.practicum.shareit.request.dto.ItemRequestWithOffersResponse;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
@@ -33,15 +34,12 @@ public class ItemRequestController {
     }
 
     @GetMapping("/all")
-    public Collection<ItemRequestWithOffersResponse> getAll(@RequestHeader("X-Sharer-User-Id") Long userId,
-                                                  @RequestParam(name = "from", defaultValue = "0")
-                                                  @Min(value = 0,
-                                                          message = "Параметр начала не может быть отрицательным")
-                                                  int from,
-                                                  @RequestParam(name = "size", defaultValue = "10")
-                                                  @Min(value = 1,
-                                                          message = "Параметр размера страницы должен быть больше 0")
-                                                  int size) {
+    public Collection<ItemRequestWithOffersResponse> getAll(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @RequestParam(name = "from", defaultValue = "0")
+                @PositiveOrZero(message = "Параметр начала не может быть отрицательным") int from,
+            @RequestParam(name = "size", defaultValue = "10")
+                @Positive(message = "Параметр размера страницы должен быть больше 0") int size) {
         return itemRequestService.getAll(userId, from, size);
     }
 

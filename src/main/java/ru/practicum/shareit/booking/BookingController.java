@@ -9,7 +9,8 @@ import ru.practicum.shareit.booking.model.StateFilter;
 import ru.practicum.shareit.booking.service.BookingService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 
 @RestController
@@ -39,30 +40,24 @@ public class BookingController {
     }
 
     @GetMapping
-    public Collection<BookingResponse> getByBookerId(@RequestParam(name = "state", defaultValue = "ALL") String state,
-                                                     @RequestHeader("X-Sharer-User-Id") Long bookerId,
-                                                     @RequestParam(name = "from", defaultValue = "0")
-                                                     @Min(value = 0,
-                                                         message = "Параметр начала не может быть отрицательным")
-                                                     int from,
-                                                     @RequestParam(name = "size", defaultValue = "10")
-                                                     @Min(value = 1,
-                                                         message = "Параметр размера страницы должен быть больше 0")
-                                                     int size) {
+    public Collection<BookingResponse> getByBookerId(
+            @RequestParam(name = "state", defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") Long bookerId,
+            @RequestParam(name = "from", defaultValue = "0")
+                @PositiveOrZero(message = "Параметр начала не может быть отрицательным") int from,
+            @RequestParam(name = "size", defaultValue = "10")
+                @Positive(message = "Параметр размера страницы должен быть больше 0") int size) {
         return bookingService.getByBookerId(StateFilter.parseString(state), bookerId, from, size);
     }
 
     @GetMapping("/owner")
-    public Collection<BookingResponse> getByOwnerId(@RequestParam(name = "state", defaultValue = "ALL") String state,
-                                                    @RequestHeader("X-Sharer-User-Id") Long ownerId,
-                                                    @RequestParam(name = "from", defaultValue = "0")
-                                                    @Min(value = 0,
-                                                        message = "Параметр начала не может быть отрицательным")
-                                                    int from,
-                                                    @RequestParam(name = "size", defaultValue = "10")
-                                                    @Min(value = 1,
-                                                        message = "Параметр размера страницы должен быть больше 0")
-                                                    int size) {
+    public Collection<BookingResponse> getByOwnerId(
+            @RequestParam(name = "state", defaultValue = "ALL") String state,
+            @RequestHeader("X-Sharer-User-Id") Long ownerId,
+            @RequestParam(name = "from", defaultValue = "0")
+                @PositiveOrZero(message = "Параметр начала не может быть отрицательным") int from,
+            @RequestParam(name = "size", defaultValue = "10")
+                @Positive(message = "Параметр размера страницы должен быть больше 0") int size) {
         return bookingService.getByOwnerId(StateFilter.parseString(state), ownerId, from, size);
     }
 }
