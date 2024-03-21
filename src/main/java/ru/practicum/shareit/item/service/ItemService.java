@@ -13,11 +13,11 @@ public interface ItemService {
 
     ItemResponse getByItemId(Long itemId, Long userId);
 
-    Collection<ItemResponse> getAllByOwnerId(Long userId);
+    Collection<ItemResponse> getAllByOwnerId(Long userId, int from, int size);
 
     ItemResponse update(Long itemId, Long userId, Item item);
 
-    Collection<ItemResponse> search(String text);
+    Collection<ItemResponse> search(String text, int from, int size);
 
     CommentResponse addComment(Long itemId, Comment comment, Long userId);
 }

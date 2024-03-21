@@ -8,6 +8,7 @@ import ru.practicum.shareit.booking.exception.BookingException;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.common.EntityNotFoundException;
 import ru.practicum.shareit.common.ForbiddenAccessToEntityException;
+import ru.practicum.shareit.common.PageableFactory;
 import ru.practicum.shareit.item.dto.CommentResponse;
 import ru.practicum.shareit.item.dto.ItemResponse;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -46,8 +47,7 @@ public class ItemServiceImpl implements ItemService {
                 .orElseThrow(() -> new EntityNotFoundException("Пользователь с id=" + userId + " не найден."));
         item.setOwner(owner);
 
-        Item item1 = itemRepository.save(item);
-        return itemMapper.toItemResponse(item1);
+        return itemMapper.toItemResponse(itemRepository.save(item));
     }
 
     @Override
@@ -65,10 +65,10 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponse> getAllByOwnerId(Long userId) {
+    public Collection<ItemResponse> getAllByOwnerId(Long userId, int from, int size) {
         log.debug("Получение списка вещей пользователя с id={}.", userId);
 
-        return itemRepository.getByOwnerIdOrderByIdAsc(userId).stream()
+        return itemRepository.findByOwnerIdOrderByIdAsc(userId, PageableFactory.getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }
@@ -98,14 +98,14 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public Collection<ItemResponse> search(String searchQuery) {
+    public Collection<ItemResponse> search(String searchQuery, int from, int size) {
         log.debug("Поиск вещей по запросу \"{}\".", searchQuery);
 
         if (searchQuery.isBlank()) {
             return Collections.emptyList();
         }
 
-        return itemRepository.findAvailableBySubstring(searchQuery).stream()
+        return itemRepository.findAvailableBySubstring(searchQuery, PageableFactory.getPageable(from, size)).stream()
                 .map(itemMapper::toItemResponse)
                 .collect(Collectors.toList());
     }

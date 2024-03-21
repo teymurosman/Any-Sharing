@@ -17,10 +17,6 @@ import java.util.Set;
 @EqualsAndHashCode(of = "id")
 public class Item {
 
-//    @Id
-//    @SequenceGenerator(name = "pk_sequence", sequenceName = "items_id_seq", allocationSize = 1)
-//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
-//    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -34,6 +30,9 @@ public class Item {
 
     @Column(name = "is_available", nullable = false)
     private Boolean available;
+
+    @Column(name = "request_id")
+    private Long requestId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id", nullable = false)

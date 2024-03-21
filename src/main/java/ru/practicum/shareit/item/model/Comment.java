@@ -15,10 +15,6 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(of = "id")
 public class Comment {
 
-//    @Id
-//    @SequenceGenerator(name = "pk_sequence", sequenceName = "comments_id_seq", allocationSize = 1)
-//    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "pk_sequence")
-//    @Column(name = "id", nullable = false, updatable = false, unique = true)
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")

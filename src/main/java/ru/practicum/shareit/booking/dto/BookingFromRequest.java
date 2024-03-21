@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class BookingCreateRequest {
+public class BookingFromRequest {
 
     @NotNull(message = "Идентификатор вещи должен быть указан.")
     private Long itemId;

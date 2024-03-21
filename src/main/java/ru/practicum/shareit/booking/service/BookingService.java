@@ -14,7 +14,7 @@ public interface BookingService {
 
     BookingResponse getByBookingId(Long bookingId, Long userId);
 
-    Collection<BookingResponse> getByBookerId(StateFilter state, Long bookerId);
+    Collection<BookingResponse> getByBookerId(StateFilter state, Long bookerId, int from, int size);
 
-    Collection<BookingResponse> getByOwnerId(StateFilter state, Long ownerId);
+    Collection<BookingResponse> getByOwnerId(StateFilter state, Long ownerId, int from, int size);
 }

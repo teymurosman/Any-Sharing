@@ -18,6 +18,8 @@ public class ItemResponse {
 
     private Boolean available;
 
+    private Long requestId;
+
     private BookingResponseForItemResponse lastBooking;
 
     private BookingResponseForItemResponse nextBooking;
