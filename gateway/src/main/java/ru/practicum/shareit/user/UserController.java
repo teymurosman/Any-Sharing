@@ -15,7 +15,6 @@ import javax.validation.Valid;
 @Slf4j
 @Validated
 public class UserController {
-    
     private final UserClient userClient;
 
     @PostMapping
