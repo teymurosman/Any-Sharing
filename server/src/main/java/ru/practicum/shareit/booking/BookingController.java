@@ -38,19 +38,19 @@ public class BookingController {
 
     @GetMapping
     public Collection<BookingResponse> getByBookerId(
-            @RequestParam(name = "state", defaultValue = "ALL") String state,
+            @RequestParam(name = "state") StateFilter state,
             @RequestHeader("X-Sharer-User-Id") Long bookerId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        return bookingService.getByBookerId(StateFilter.parseString(state), bookerId, from, size);
+            @RequestParam(name = "from") int from,
+            @RequestParam(name = "size") int size) {
+        return bookingService.getByBookerId(state, bookerId, from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingResponse> getByOwnerId(
-            @RequestParam(name = "state", defaultValue = "ALL") String state,
+            @RequestParam(name = "state") StateFilter state,
             @RequestHeader("X-Sharer-User-Id") Long ownerId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
-        return bookingService.getByOwnerId(StateFilter.parseString(state), ownerId, from, size);
+            @RequestParam(name = "from") int from,
+            @RequestParam(name = "size") int size) {
+        return bookingService.getByOwnerId(state, ownerId, from, size);
     }
 }

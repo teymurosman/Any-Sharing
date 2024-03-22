@@ -33,8 +33,8 @@ public class ItemRequestController {
     @GetMapping("/all")
     public Collection<ItemRequestWithOffersResponse> getAll(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "from") int from,
+            @RequestParam(name = "size") int size) {
         return itemRequestService.getAll(userId, from, size);
     }
 

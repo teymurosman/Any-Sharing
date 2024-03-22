@@ -37,8 +37,8 @@ public class ItemController {
     @GetMapping
     public Collection<ItemResponse> getAllByOwnerId(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10")int size) {
+            @RequestParam(name = "from") int from,
+            @RequestParam(name = "size") int size) {
         return itemService.getAllByOwnerId(userId, from, size);
     }
 
@@ -51,8 +51,8 @@ public class ItemController {
     @GetMapping("/search")
     public Collection<ItemResponse> search(
             @RequestParam("text") String text,
-            @RequestParam(name = "from", defaultValue = "0") int from,
-            @RequestParam(name = "size", defaultValue = "10") int size) {
+            @RequestParam(name = "from") int from,
+            @RequestParam(name = "size") int size) {
         return itemService.search(text, from, size);
     }
 
